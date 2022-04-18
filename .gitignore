@@ -1,0 +1,10 @@
+lib/bot/token.0
+lib/cogs/__pycache__/*
+lib/db/__pycache__/*
+.vscode*
+data/*.db
+lib/channels.py
+lib/__pycache__/*
+lib/bot/__pycache__/*
+bot-env
+lib/owners.py
