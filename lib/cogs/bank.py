@@ -113,6 +113,11 @@ class Bank(Cog):
             await ctx.send(success_message)
         else:
             await ctx.send('Either user doesn\'t exist or you\'ll overdraw')
+    
+    @command(name='dontdothisunlessyoureabsolutelysure')
+    async def reset_all(self, ctx):
+        db.execute('DELETE FROM bank')
+        await ctx.send('Man hope you were sure, you just nuked everything')
 
     #Helper functions and shit
     def can_this_happen(self, stripped_user_name, currency_db, sub_amount=0):
@@ -145,7 +150,6 @@ class Bank(Cog):
                 currency = key
                 continue
         return user_name, amount, currency_db, currency
-
 
 def setup(bot):
     bot.add_cog(Bank(bot))
