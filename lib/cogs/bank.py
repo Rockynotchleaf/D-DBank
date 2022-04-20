@@ -34,7 +34,6 @@ class Bank(Cog):
             await ctx.send('Nice try bud')
     
     @command(name='enroll')
-    @isDm()
     async def add_user(self, ctx, *, message):
         nick_name = message.split()[1]
         stripped_message = self.strip_user_name(message.split()[0])
