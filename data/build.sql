@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS bank (
+    IsDm integer DEFAULT 0,
     CharacterName text DEFAULT '',
     NickName text DEFAULT '',
     CopperAmt integer DEFAULT 0,
