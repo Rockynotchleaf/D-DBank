@@ -1,4 +1,4 @@
-# Foobar
+# What is this
 
 D-DBank is a discord.py bot that can keep track of your players wallets in D&D
 ## Installation
