@@ -73,7 +73,7 @@ class Bank(Cog):
     async def loot_currency(self, ctx, *, message):
         new_message = "all " + message
         user_name, amount, currency_db, currency = self.currency_formatting(new_message)
-        db.execute("UPDATE bank SET {} = {} + ?".format(currency_db, currency_db), amount)
+        db.execute("UPDATE bank SET {} = {} + ? WHERE IsDm = 0".format(currency_db, currency_db), amount)
         success_message = f'Sent {amount} {currency} to everyone!'
         await ctx.send(success_message)
 
@@ -90,27 +90,31 @@ class Bank(Cog):
             await ctx.send('Either user doesn\'t exist or you\'ll overdraw')
 
     @command(name='transfer')
-    @isDm()
     async def transfer_currency(self, ctx, *, message):
         user_name_1 = message.split()[0]
-        user_name_2 = message.split()[1]
-        amount = message.split()[2]
-        currency = message.split()[3]
+        dm_record = db.record('SELECT CharacterName FROM bank WHERE IsDm = 1')
 
-        #string compare maybe toLower and select from dict
-        currency, currency_db = self.get_database_currency(currency)
-        stripped_user_name_1 = self.strip_user_name(user_name_1)
-        user_1_names = self.get_user_and_nick_name(stripped_user_name_1)
-        stripped_user_name_2 = self.strip_user_name(user_name_2)
-        user_2_names = self.get_user_and_nick_name(stripped_user_name_2)
+        if int(ctx.message.author.id) == int(dm_record[0]) or int(ctx.message.author.id) == int(self.strip_user_name(user_name_1)):
+            user_name_2 = message.split()[1]
+            amount = message.split()[2]
+            currency = message.split()[3]
 
-        if user_1_names and user_2_names and self.can_this_happen(stripped_user_name_1, currency_db, sub_amount=amount) and self.can_this_happen(stripped_user_name_2, currency_db):
-            self.update_user_bank(currency_db, amount, stripped_user_name_1, '-')
-            self.update_user_bank(currency_db, amount, stripped_user_name_2, '+')
-            success_message = f'Withdrew {amount} {currency} from {user_1_names[1]} and given to {user_2_names[1]}'
-            await ctx.send(success_message)
+            #string compare maybe toLower and select from dict
+            currency, currency_db = self.get_database_currency(currency)
+            stripped_user_name_1 = self.strip_user_name(user_name_1)
+            user_1_names = self.get_user_and_nick_name(stripped_user_name_1)
+            stripped_user_name_2 = self.strip_user_name(user_name_2)
+            user_2_names = self.get_user_and_nick_name(stripped_user_name_2)
+
+            if user_1_names and user_2_names and self.can_this_happen(stripped_user_name_1, currency_db, sub_amount=amount) and self.can_this_happen(stripped_user_name_2, currency_db):
+                self.update_user_bank(currency_db, amount, stripped_user_name_1, '-')
+                self.update_user_bank(currency_db, amount, stripped_user_name_2, '+')
+                success_message = f'Withdrew {amount} {currency} from {user_1_names[1]} and given to {user_2_names[1]}'
+                await ctx.send(success_message)
+            else:
+                await ctx.send('Either user doesn\'t exist or you\'ll overdraw')
         else:
-            await ctx.send('Either user doesn\'t exist or you\'ll overdraw')
+            await ctx.send('You cant do that, its not your money')
 
     @command(name='dontdothisunlessyoureabsolutelysure')
     @isDm()
@@ -129,8 +133,8 @@ class Bank(Cog):
             return False
     
     def format_balance_embed(self, user_account):
-        embed = Embed(title=f"{user_account[1]}'s Bank Balance", description="How much you got?")
-        just_the_money_values = user_account[2:]
+        embed = Embed(title=f"{user_account[2]}'s Bank Balance", description="How much you got?")
+        just_the_money_values = user_account[3:]
         currency_strings = []
         for key in CURRENCY_DICT.keys():
             currency_strings.append(key)
